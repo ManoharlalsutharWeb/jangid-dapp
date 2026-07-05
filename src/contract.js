@@ -15,12 +15,14 @@ export const CONTRACT_ABI = [
   "event DomainRegistered(string domain, address owner, uint256 tokenId)"
 ];
 
+const SEPOLIA_RPC = 'https://ethereum-sepolia-rpc.publicnode.com';
+
 export function getContract(signer) {
   return new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 }
 
 export async function checkAvailability(name) {
-  const provider = new ethers.JsonRpcProvider('https://rpc.sepolia.org');
+  const provider = new ethers.JsonRpcProvider(SEPOLIA_RPC);
   const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
   return await contract.isAvailable(name);
 }
@@ -34,12 +36,12 @@ export async function registerDomain(name, signer) {
 }
 
 export async function getUserDomains(address) {
-  const provider = new ethers.JsonRpcProvider('https://rpc.sepolia.org');
+  const provider = new ethers.JsonRpcProvider(SEPOLIA_RPC);
   const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
-  
+
   const filter = contract.filters.DomainRegistered(null, address);
   const events = await contract.queryFilter(filter, 0, 'latest');
-  
+
   const domains = await Promise.all(
     events.map(async (event) => {
       const name = event.args[0];
@@ -47,6 +49,6 @@ export async function getUserDomains(address) {
       return { name, resolvedAddress };
     })
   );
-  
+
   return domains;
 }
